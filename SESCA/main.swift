@@ -1,0 +1,556 @@
+//
+//  main.swift
+//  SESCA
+//
+//  Created by Kenna Blackburn on 11/13/25.
+//
+
+import Foundation
+import UniformTypeIdentifiers
+
+struct Master: Codable, Hashable {
+    let actions: Set<Action>
+    
+    let types: Set<ValueType>
+    
+    let containers: Set<Container>
+    
+    struct Action: Codable, Hashable {
+        typealias PersistentID = String
+        
+        let persistentID: PersistentID
+        
+        let parameters: [Parameter]
+        let outputTypeID: ValueType.PersistentID
+        
+        let authenticationPolicy: AuthenticationPolicy?
+        
+        let sourceContainerID: Container.PersistentID
+        let attributionContainerID: Container.PersistentID?
+        
+        let localization: Localization
+        
+        let _flags: Int
+        let _visibilityFlags: Int
+        let _requirements: Data
+        let _customIcon: Data?
+        let _sourceActionProviderID: String
+        let _outputTypeInstance: ValueType._Instance
+        
+        enum AuthenticationPolicy: String, Codable, Hashable {
+            case requiresAuthenticationOnOriginAndRemote
+            case requiresAuthenticationOnOrigin
+        }
+        
+        struct Localization: Codable, Hashable {
+            let localeID: String
+            
+            let name: String
+            
+            let descriptionSummary: String?
+            let descriptionRequirements: String?
+            let descriptionNote: String?
+            let descriptionAttribution: String?
+            
+            let outputName: String?
+            let outputDescription: String?
+            
+            let category: String?
+            let searchKeywords: [String]
+        }
+        
+        struct Parameter: Codable, Hashable {
+            let key: String
+            
+            let inputTypeID: ValueType.PersistentID
+            
+            let localization: Localization
+            
+            let _inputTypeInstance: ValueType._Instance
+            let _relationships: Data
+            let _flags: Int
+            
+            struct Localization: Codable, Hashable {
+                let localeID: String
+                
+                let name: String
+                
+                let descriptionSummary: String?
+                
+                let booleanDisplay: BooleanDisplay?
+                
+                struct BooleanDisplay: Codable, Hashable {
+                    var `true`: String?
+                    var `false`: String?
+                }
+            }
+        }
+    }
+    
+    struct Container: Codable, Hashable {
+        typealias PersistentID = String
+        
+        let persistentID: PersistentID
+        
+        let bundleVersionString: String
+        let teamID: String?
+        
+        let localization: Localization
+        
+        let _origin: Int
+        let _containerType: Int
+        
+        struct Localization: Codable, Hashable {
+            let localeID: String
+            
+            let name: String
+        }
+    }
+    
+    struct ValueType: Codable, Hashable {
+        typealias PersistentID = String
+        
+        let persistentID: PersistentID
+        
+        let kindSpecificMetadata: KindSpecificMetadata
+        
+        let sourceContainerID: Container.PersistentID
+        let coercions: Set<UTType>
+        
+        let localization: Locatization
+        
+        let _blobID: Data
+        let _kind: Int
+        let _runtimeFlags: Int?
+        let _runtimeRequirements: Data?
+        
+        enum KindSpecificMetadata: Codable, Hashable {
+            case entity(Entity)
+            case enumeration(Enumeration)
+            
+            struct Entity: Codable, Hashable {
+                let properties: Set<Property>
+                
+                struct Property: Codable, Hashable {
+                    typealias PersistentID = String
+                    
+                    let persistentID: PersistentID
+                    
+                    let localization: Locatization
+                    
+                    let _typeInstance: ValueType._Instance
+                    
+                    struct Locatization: Codable, Hashable {
+                        let localeID: String
+                        
+                        let name: String
+                    }
+                }
+            }
+            
+            struct Enumeration: Codable, Hashable {
+                let localization: Locatization
+                
+                let cases: Set<Case>
+                
+                struct Case: Codable, Hashable {
+                    typealias PersistentID = String
+                    
+                    let persistentID: PersistentID
+                    
+                    let localization: Locatization
+                    
+                    struct Locatization: Codable, Hashable {
+                        let localeID: String
+                        
+                        let title: String
+                        let subtitle: String?
+                    }
+                }
+                
+                struct Locatization: Codable, Hashable {
+                    let localeID: String
+                }
+            }
+        }
+        
+        struct Locatization: Codable, Hashable {
+            let localeID: String
+            
+            let name: String
+        }
+        
+        typealias _Instance = Data
+    }
+}
+
+enum Main {
+    enum Configuration {
+        static let temporaryDirectory: URL = URL
+            .desktopDirectory
+            .appending(path: UUID().uuidString)
+        
+        static let eraseTemporaryDirectoryWhenDone: Bool = true
+        
+        // `~/Library/` is protected so you must use a copy of the link of `~/Library/Shortcuts/ToolKit/Tools-active`
+        static let toolsSQLiteURL: URL = URL
+            .desktopDirectory
+            .appending(path: "SESCA/Tools-prod_1.sqlite")
+        
+        static let outputURL: URL = URL
+            .desktopDirectory
+            .appending(path: "SESCA/Master_3_3.json")
+    }
+    
+    static func main() throws {
+        let rawJSONDirectory = try parseSQLiteIntoRawJSONDirectory(sqliteURL: Configuration.toolsSQLiteURL)
+        let tableBundle = try parseRawJSONDirectoryIntoMemory(rawJSONDirectory: rawJSONDirectory)
+        
+        let master: Master = try Master(
+            actions: Set(
+                tableBundle
+                    .rawToolRows
+                    .map { rawToolRow in
+                        Master.Action(
+                            persistentID: rawToolRow.id,
+                            parameters: try {
+                                try tableBundle
+                                    .rawParameterRows
+                                    .filter({ $0.toolID == rawToolRow.rowID })
+                                    .sorted(using: SortDescriptor(\.sortOrder))
+                                    .map { rawParameterRow in
+                                        Master.Action.Parameter(
+                                            key: rawParameterRow.key,
+                                            inputTypeID: try {
+                                                try tableBundle
+                                                    .rawToolParameterTypeRows
+                                                    .first {
+                                                        $0.key == rawParameterRow.key &&
+                                                        $0.toolID == rawToolRow.rowID
+                                                    }
+                                                    .unwrap(throwing: LocativeError())
+                                                    .typeID
+                                            }(),
+                                            localization: try {
+                                                let rawParameterLocalizationRow = try tableBundle
+                                                    .rawParameterLocalizationRows
+                                                    .first {
+                                                        $0.key == rawParameterRow.key &&
+                                                        $0.toolID == rawToolRow.rowID
+                                                    }
+                                                    .unwrap(throwing: LocativeError())
+                                                
+                                                return Master.Action.Parameter.Localization(
+                                                    localeID: rawParameterLocalizationRow.locale,
+                                                    name: rawParameterLocalizationRow.name,
+                                                    descriptionSummary: rawParameterLocalizationRow.description,
+                                                    booleanDisplay: {
+                                                        if rawParameterLocalizationRow.trueString == nil,
+                                                           rawParameterLocalizationRow.falseString == nil
+                                                        {
+                                                            return nil
+                                                        } else {
+                                                            return Master.Action.Parameter.Localization.BooleanDisplay(
+                                                                true: rawParameterLocalizationRow.trueString,
+                                                                false: rawParameterLocalizationRow.falseString
+                                                            )
+                                                        }
+                                                    }(),
+                                                )
+                                            }(),
+                                            _inputTypeInstance: try {
+                                                try rawParameterRow
+                                                    .typeInstance
+                                                    .data(using: .utf8)
+                                                    .unwrap(throwing: LocativeError())
+                                            }(),
+                                            _relationships: try {
+                                                try rawParameterRow
+                                                    .relationships
+                                                    .data(using: .utf8)
+                                                    .unwrap(throwing: LocativeError())
+                                            }(),
+                                            _flags: rawParameterRow.flags
+                                        )
+                                    }
+                            }(),
+                            outputTypeID: try {
+                                try tableBundle
+                                    .rawToolOutputTypeRows
+                                    .first(where: { $0.toolID == rawToolRow.rowID })
+                                    .unwrap(throwing: LocativeError())
+                                    .typeIdentifier
+                            }(),
+                            authenticationPolicy: Master.Action.AuthenticationPolicy(rawValue: rawToolRow.authenticationPolicy),
+                            sourceContainerID: try {
+                                try tableBundle
+                                    .rawContainerMetadataRows
+                                    .first(where: { $0.rowID == rawToolRow.sourceContainerID })
+                                    .unwrap(throwing: LocativeError())
+                                    .id
+                            }(),
+                            attributionContainerID: {
+                                tableBundle
+                                    .rawContainerMetadataRows
+                                    .first(where: { $0.rowID == rawToolRow.attributionContainerID })?
+                                    .id
+                            }(),
+                            localization: try {
+                                let rawToolLocalizationRow = try tableBundle
+                                    .rawToolLocalizationRows
+                                    .first(where: { $0.toolID == rawToolRow.rowID })
+                                    .unwrap(throwing: LocativeError())
+                                
+                                return Master.Action.Localization(
+                                    localeID: rawToolLocalizationRow.locale,
+                                    name: rawToolLocalizationRow.name,
+                                    descriptionSummary: rawToolLocalizationRow.descriptionSummary,
+                                    descriptionRequirements: rawToolLocalizationRow.descriptionRequires,
+                                    descriptionNote: rawToolLocalizationRow.descriptionNote,
+                                    descriptionAttribution: rawToolLocalizationRow.descriptionAttribution,
+                                    outputName: rawToolLocalizationRow.outputResultName,
+                                    outputDescription: rawToolLocalizationRow.descriptionResult,
+                                    category: {
+                                        tableBundle
+                                            .rawCategoryRows
+                                            .first {
+                                                $0.toolID == rawToolRow.rowID &&
+                                                $0.locale == rawToolLocalizationRow.locale
+                                            }?
+                                            .category
+                                    }(),
+                                    searchKeywords: {
+                                        tableBundle
+                                            .rawSearchKeywordRows
+                                            .filter({ $0.locale == rawToolLocalizationRow.locale })
+                                            .filter({ $0.toolID == rawToolRow.rowID })
+                                            .sorted(using: SortDescriptor(\.order))
+                                            .map(\.keyword)
+                                    }()
+                                )
+                            }(),
+                            _flags: rawToolRow.flags,
+                            _visibilityFlags: rawToolRow.visibilityFlags,
+                            _requirements: try {
+                                try rawToolRow
+                                    .requirements
+                                    .data(using: .utf8)
+                                    .unwrap(throwing: LocativeError())
+                            }(),
+                            _customIcon: try rawToolRow.customIcon.map {
+                                try $0
+                                    .data(using: .utf8)
+                                    .unwrap(throwing: LocativeError())
+                            },
+                            _sourceActionProviderID: rawToolRow.sourceActionProvider,
+                            _outputTypeInstance: try {
+                                try rawToolRow
+                                    .outputTypeInstance
+                                    .data(using: .utf8)
+                                    .unwrap(throwing: LocativeError())
+                            }(),
+                        )
+                    }
+            ),
+            types: Set(
+                tableBundle
+                    .rawTypeRows
+                    .map { rawTypeRow in
+                        Master.ValueType(
+                            persistentID: rawTypeRow.rowID,
+                            kindSpecificMetadata: try {
+                                return .entity(Master.ValueType.KindSpecificMetadata.Entity(properties: Set()))
+                            }(),
+                            sourceContainerID: try {
+                                try tableBundle
+                                    .rawContainerMetadataRows
+                                    .first(where: { $0.rowID == rawTypeRow.sourceContainerID })
+                                    .unwrap(throwing: LocativeError())
+                                    .id
+                            }(),
+                            coercions: Set(
+                                tableBundle
+                                    .rawUTTypeCoercionRows
+                                    .filter({ $0.typeID == rawTypeRow.rowID })
+                                    .map({ UTType(importedAs: $0.coercionIdentifier) })
+                            ),
+                            localization: {
+                                let rawTypeDisplayRepresentationRow = try tableBundle
+                                    .rawTypeDisplayRepresentationRows
+                                    .first(where: { $0.typeID == rawTypeRow.rowID })
+                                    .unwrap(throwing: LocativeError())
+                                
+                                return Master.ValueType.Locatization(
+                                    localeID: rawTypeDisplayRepresentationRow.locale,
+                                    name: rawTypeDisplayRepresentationRow.name
+                                )
+                            }(),
+                            _blobID: rawTypeRow.id,
+                            _kind: rawTypeRow.kind,
+                            _runtimeFlags: rawTypeRow.runtimeFlags,
+                            _runtimeRequirements: try rawTypeRow.runtimeRequirements.map {
+                                try $0
+                                    .data(using: .utf8)
+                                    .unwrap(throwing: LocativeError())
+                            }()
+                        )
+                    }
+            ),
+            containers: Set(
+                tableBundle
+                    .rawContainerMetadataRows
+                    .map { rawContainerMetadataRow in
+                        Master.Container(
+                            persistentID: rawContainerMetadataRow.id,
+                            bundleVersionString: rawContainerMetadataRow.bundleVersion,
+                            teamID: {
+                                let teamID = rawContainerMetadataRow.teamID
+                                return teamID.isEmpty ? nil : teamID
+                            }(),
+                            localization: try {
+                                let rawContainerMetadataLocalizationRow = try tableBundle
+                                    .rawContainerMetadataLocalizationRows
+                                    .first(where: { $0.containerID == rawContainerMetadataRow.rowID })
+                                    .unwrap(throwing: LocativeError())
+                                
+                                return Master.Container.Localization(
+                                    localeID: rawContainerMetadataLocalizationRow.locale,
+                                    name: rawContainerMetadataLocalizationRow.name,
+                                )
+                            }(),
+                            _origin: rawContainerMetadataRow.origin,
+                            _containerType: rawContainerMetadataRow.containerType,
+                        )
+                    }
+            ),
+        )
+        
+        try saveMasterAsJSON(master: master, to: Configuration.outputURL)
+        
+        if Configuration.eraseTemporaryDirectoryWhenDone {
+            try FileManager.default.removeItem(at: Configuration.temporaryDirectory)
+        }
+    }
+    
+    static func parseSQLiteIntoRawJSONDirectory(
+        sqliteURL: URL
+    ) throws -> URL {
+        @discardableResult
+        func runCommand(_ command: String) throws -> String? {
+            let process = Process()
+            process.executableURL = URL(filePath: "/bin/zsh")
+            process.arguments = ["-c", command]
+            
+            let pipe = Pipe()
+            process.standardOutput = pipe
+            process.standardError = pipe
+            
+            try process.run()
+            
+            process.waitUntilExit()
+            
+            guard let data = try pipe.fileHandleForReading.readToEnd(),
+                  let string = String(data: data, encoding: .utf8)
+            else {
+                return nil
+            }
+            
+            return string
+        }
+        
+        let rawJSONDirectory = Configuration.temporaryDirectory
+            .appending(path: "RawJSON")
+        
+        try FileManager.default.createDirectory(at: rawJSONDirectory, withIntermediateDirectories: true)
+        
+        let tables = try {
+            guard let string = try runCommand(
+                "sqlite3 '\(sqliteURL.path())' \"SELECT name FROM sqlite_master WHERE type='table';\""
+            ) else {
+                throw LocativeError()
+            }
+            
+            let tables = string
+                .components(separatedBy: "\n")
+                .filter({ !$0.isEmpty })
+            
+            return tables
+        }()
+        
+        for table in tables {
+            let jsonURL = rawJSONDirectory
+                .appending(path: table + ".json")
+            
+            try runCommand("sqlite3 '\(sqliteURL.path())' -json \"SELECT * FROM \(table);\" > '\(jsonURL.path())'")
+        }
+        
+        return rawJSONDirectory
+    }
+    
+    static func parseRawJSONDirectoryIntoMemory(
+        rawJSONDirectory: URL
+    ) throws -> RawRows.Bundle {
+        func decode<T: Decodable>(
+            _ type: T.Type,
+            from filename: String,
+        ) -> [T] {
+            let url = rawJSONDirectory.appending(path: filename + ".json")
+            
+            do {
+                let data = try Data(contentsOf: url)
+                return try JSONDecoder().decode([T].self, from: data)
+            } catch {
+                print("Failed to parse json at '/\(filename).json'. Substituting with '[]'.")
+                return []
+            }
+        }
+        
+        return (
+            decode(RawRows.AdditionalToolAttributionContainerRow.self, from: "AdditionalToolAttributionContainers"),
+            decode(RawRows.CategoryRow.self, from: "Categories"),
+            decode(RawRows.ContainerMetadataLocalizationRow.self, from: "ContainerMetadataLocalizations"),
+            decode(RawRows.ContainerMetadataRow.self, from: "ContainerMetadata"),
+            decode(RawRows.ContainerMetadataSynonymRow.self, from: "ContainerMetadataSynonyms"),
+            decode(RawRows.EntityPropertyLocalizationRow.self, from: "EntityPropertyLocalizations"),
+            decode(RawRows.EntityPropertyRow.self, from: "EntityProperties"),
+            decode(RawRows.EnumerationCaseRow.self, from: "EnumerationCases"),
+            decode(RawRows.LaunchServiceStateRow.self, from: "LaunchServicesState"),
+            decode(RawRows.LinkActionIdentifierRow.self, from: "LinkActionIdentifiers"),
+            decode(RawRows.LinkStateRow.self, from: "LinkState"),
+            decode(RawRows.MetadataRow.self, from: "Metadata"),
+            decode(RawRows.ParameterLocalizationRow.self, from: "ParameterLocalizations"),
+            decode(RawRows.ParameterRow.self, from: "Parameters"),
+            decode(RawRows.PredicateTemplateRow.self, from: "PredicateTemplates"),
+            decode(RawRows.SearchKeywordRow.self, from: "SearchKeywords"),
+            decode(RawRows.SystemToolProtocolRow.self, from: "SystemToolProtocols"),
+            decode(RawRows.SystemTypeProtocolRow.self, from: "SystemTypeProtocols"),
+            decode(RawRows.ToolLocalizationRow.self, from: "ToolLocalizations"),
+            decode(RawRows.ToolOutputTypeRow.self, from: "ToolOutputTypes"),
+            decode(RawRows.ToolParameterTypeRow.self, from: "ToolParameterTypes"),
+            decode(RawRows.ToolRow.self, from: "Tools"),
+            decode(RawRows.TriggerLocalizationRow.self, from: "TriggerLocalizations"),
+            decode(RawRows.TriggerOutputTypeRow.self, from: "TriggerOutputTypes"),
+            decode(RawRows.TriggerParameterLocalizationRow.self, from: "TriggerParameterLocalizations"),
+            decode(RawRows.TriggerParameterRow.self, from: "TriggerParameters"),
+            decode(RawRows.TriggerRow.self, from: "Triggers"),
+            decode(RawRows.TypeCoercionRow.self, from: "TypeCoercions"),
+            decode(RawRows.TypeDisplayRepresentationRow.self, from: "TypeDisplayRepresentations"),
+            decode(RawRows.TypeRow.self, from: "Types"),
+            decode(RawRows.UTTypeCoercionRow.self, from: "UTTypeCoercions"),
+        )
+    }
+    
+    static func saveMasterAsJSON(
+        master: Master,
+        to fileURL: URL
+    ) throws {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        
+        let data = try encoder.encode(master)
+        
+        try data.write(to: fileURL, options: .atomic)
+    }
+}
+
+try! Main.main()
