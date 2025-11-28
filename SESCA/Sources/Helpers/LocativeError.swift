@@ -2,9 +2,10 @@
 //  LocativeError.swift
 //  SESCA
 //
-//  Created by Kenna Blackburn on 11/14/25.
+//  Created by Kenna Blackburn on 11/27/25.
 //
 
+import Foundation
 
 struct LocativeError: Error {
     let file: String
