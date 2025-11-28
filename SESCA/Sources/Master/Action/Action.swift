@@ -48,7 +48,7 @@ extension Master.Action {
             .rawParameterRows
             .filter({ $0.toolID == rawToolRow.rowID })
             .sorted(using: SortDescriptor(\.sortOrder))
-            .map({ try Parameter(rawParameterRow: $0, tableBundle: tableBundle) })
+            .map({ try Master.Action.Parameter(rawParameterRow: $0, tableBundle: tableBundle) })
         
         self.outputTypeID = try tableBundle
             .rawToolOutputTypeRows
@@ -56,7 +56,7 @@ extension Master.Action {
             .unwrap(throwing: LocativeError())
             .typeIdentifier
         
-        self.authenticationPolicy = AuthenticationPolicy(rawValue: rawToolRow.authenticationPolicy)
+        self.authenticationPolicy = Master.Action.AuthenticationPolicy(rawValue: rawToolRow.authenticationPolicy)
         
         self.sourceContainerID = try tableBundle
             .rawContainerMetadataRows
@@ -69,7 +69,7 @@ extension Master.Action {
             .first(where: { $0.rowID == rawToolRow.attributionContainerID })?
             .id
         
-        self.localization = try Localization(rawToolRow: rawToolRow, tableBundle: tableBundle)
+        self.localization = try Master.Action.Localization(rawToolRow: rawToolRow, tableBundle: tableBundle)
         
         self._flags = rawToolRow.flags
         

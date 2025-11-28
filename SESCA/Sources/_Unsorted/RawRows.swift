@@ -12,78 +12,78 @@ import Foundation
 // TODO: add O(1) indexing
 // TODO: rename things
 
-enum RawRows {
-    typealias Bundle = (
-        rawAdditionalToolAttributionContainerRows: [RawRows.AdditionalToolAttributionContainerRow],
-        rawCategoryRows: [RawRows.CategoryRow],
-        rawContainerMetadataLocalizationRows: [RawRows.ContainerMetadataLocalizationRow],
-        rawContainerMetadataRows: [RawRows.ContainerMetadataRow],
-        rawContainerMetadataSynonymRows: [RawRows.ContainerMetadataSynonymRow],
-        rawEntityPropertyLocalizationRows: [RawRows.EntityPropertyLocalizationRow],
-        rawEntityPropertyRows: [RawRows.EntityPropertyRow],
-        rawEnumerationCaseRows: [RawRows.EnumerationCaseRow],
-        rawLaunchServiceStateRows: [RawRows.LaunchServiceStateRow],
-        rawLinkActionIdentifierRows: [RawRows.LinkActionIdentifierRow],
-        rawLinkStateRows: [RawRows.LinkStateRow],
-        rawMetadataRows: [RawRows.MetadataRow],
-        rawParameterLocalizationRows: [RawRows.ParameterLocalizationRow],
-        rawParameterRows: [RawRows.ParameterRow],
-        rawPredicateTemplateRows: [RawRows.PredicateTemplateRow],
-        rawSearchKeywordRows: [RawRows.SearchKeywordRow],
-        rawSystemToolProtocolRows: [RawRows.SystemToolProtocolRow],
-        rawSystemTypeProtocolRows: [RawRows.SystemTypeProtocolRow],
-        rawToolLocalizationRows: [RawRows.ToolLocalizationRow],
-        rawToolOutputTypeRows: [RawRows.ToolOutputTypeRow],
-        rawToolParameterTypeRows: [RawRows.ToolParameterTypeRow],
-        rawToolRows: [RawRows.ToolRow],
-        rawTriggerLocalizationRows: [RawRows.TriggerLocalizationRow],
-        rawTriggerOutputTypeRows: [RawRows.TriggerOutputTypeRow],
-        rawTriggerParameterLocalizationRows: [RawRows.TriggerParameterLocalizationRow],
-        rawTriggerParameterRows: [RawRows.TriggerParameterRow],
-        rawTriggerRows: [RawRows.TriggerRow],
-        rawTypeCoercionRows: [RawRows.TypeCoercionRow],
-        rawTypeDisplayRepresentationRows: [RawRows.TypeDisplayRepresentationRow],
-        rawTypeRows: [RawRows.TypeRow],
-        rawUTTypeCoercionRows: [RawRows.UTTypeCoercionRow]
-    )
+struct RawSQLite {
+    let additionalToolAttributionContainerRows: [RawSQLite.AdditionalToolAttributionContainerRow]
+    let categoryRows: [RawSQLite.CategoryRow]
+    let containerMetadataLocalizationRows: [RawSQLite.ContainerMetadataLocalizationRow]
+    let containerMetadataRows: [RawSQLite.ContainerMetadataRow]
+    let containerMetadataSynonymRows: [RawSQLite.ContainerMetadataSynonymRow]
+    let entityPropertyLocalizationRows: [RawSQLite.EntityPropertyLocalizationRow]
+    let entityPropertyRows: [RawSQLite.EntityPropertyRow]
+    let enumerationCaseRows: [RawSQLite.EnumerationCaseRow]
+    let launchServiceStateRows: [RawSQLite.LaunchServiceStateRow]
+    let linkActionIdentifierRows: [RawSQLite.LinkActionIdentifierRow]
+    let linkStateRows: [RawSQLite.LinkStateRow]
+    let metadataRows: [RawSQLite.MetadataRow]
+    let parameterLocalizationRows: [RawSQLite.ParameterLocalizationRow]
+    let parameterRows: [RawSQLite.ParameterRow]
+    let predicateTemplateRows: [RawSQLite.PredicateTemplateRow]
+    let searchKeywordRows: [RawSQLite.SearchKeywordRow]
+    let systemToolProtocolRows: [RawSQLite.SystemToolProtocolRow]
+    let systemTypeProtocolRows: [RawSQLite.SystemTypeProtocolRow]
+    let toolLocalizationRows: [RawSQLite.ToolLocalizationRow]
+    let toolOutputTypeRows: [RawSQLite.ToolOutputTypeRow]
+    let toolParameterTypeRows: [RawSQLite.ToolParameterTypeRow]
+    let toolRows: [RawSQLite.ToolRow]
+    let triggerLocalizationRows: [RawSQLite.TriggerLocalizationRow]
+    let triggerOutputTypeRows: [RawSQLite.TriggerOutputTypeRow]
+    let triggerParameterLocalizationRows: [RawSQLite.TriggerParameterLocalizationRow]
+    let triggerParameterRows: [RawSQLite.TriggerParameterRow]
+    let triggerRows: [RawSQLite.TriggerRow]
+    let typeCoercionRows: [RawSQLite.TypeCoercionRow]
+    let typeDisplayRepresentationRows: [RawSQLite.TypeDisplayRepresentationRow]
+    let typeRows: [RawSQLite.TypeRow]
+    let utTypeCoercionRows: [RawSQLite.UTTypeCoercionRow]
+}
 
+extension RawSQLite {
     struct AdditionalToolAttributionContainerRow: Codable {
-        let toolID: Int
-        let containerID: String
+        let transientToolID: Int
+        let transientContainerID: String
 
         enum CodingKeys: String, CodingKey {
-            case toolID = "toolId"
-            case containerID = "containerId"
+            case transientToolID = "toolId"
+            case transientContainerID = "containerId"
         }
     }
 
     struct CategoryRow: Codable {
-        let toolID: Int
+        let transientToolID: Int
         let locale: String
         let category: String
 
         enum CodingKeys: String, CodingKey {
-            case toolID = "toolId"
+            case transientToolID = "toolId"
             case locale = "locale"
             case category = "category"
         }
     }
 
     struct ContainerMetadataLocalizationRow: Codable {
-        let containerID: Int
+        let transientContainerID: Int
         let locale: String
         let name: String
 
         enum CodingKeys: String, CodingKey {
-            case containerID = "containerId"
+            case transientContainerID = "containerId"
             case locale = "locale"
             case name = "name"
         }
     }
 
     struct ContainerMetadataRow: Codable {
-        let rowID: Int
-        let id: String
+        let transientContainerID: Int
+        let persistentContainerID: String
         let bundleVersion: String
         let teamID: String
         let deviceID: String
@@ -91,8 +91,8 @@ enum RawRows {
         let containerType: Int
 
         enum CodingKeys: String, CodingKey {
-            case rowID = "rowId"
-            case id = "id"
+            case transientContainerID = "rowId"
+            case persistentContainerID = "id"
             case bundleVersion = "bundleVersion"
             case teamID = "teamId"
             case deviceID = "deviceId"
@@ -102,13 +102,13 @@ enum RawRows {
     }
 
     struct ContainerMetadataSynonymRow: Codable {
-        let containerID: Int
+        let transientContainerID: Int
         let locale: String
         let synonym: String
         let order: Int
 
         enum CodingKeys: String, CodingKey {
-            case containerID = "containerId"
+            case transientContainerID = "containerId"
             case locale = "locale"
             case synonym = "synonym"
             case order = "order"
@@ -116,43 +116,44 @@ enum RawRows {
     }
 
     struct EntityPropertyLocalizationRow: Codable {
-        let typeID: String
-        let propertyID: String
+        let persistentEntityID: String
+        let persistentPropertyID: String
         let locale: String
         let displayName: String
 
         enum CodingKeys: String, CodingKey {
-            case typeID = "typeId"
-            case propertyID = "propertyId"
+            case persistentEntityID = "typeId"
+            case persistentPropertyID = "propertyId"
             case locale = "locale"
             case displayName = "displayName"
         }
     }
 
     struct EntityPropertyRow: Codable {
-        let id: String
-        let typeID: String
-        let typeInstance: String
+        let persistentPropertyID: String
+        let persistentEntityID: String
+        let typeInstanceBlob: String
 
         enum CodingKeys: String, CodingKey {
-            case id = "id"
-            case typeID = "typeId"
-            case typeInstance = "typeInstance"
+            case persistentPropertyID = "id"
+            case persistentEntityID = "typeId"
+            case typeInstanceBlob = "typeInstance"
         }
     }
 
     struct EnumerationCaseRow: Codable {
-        let typeID: String
+        let persistentEnumerationID: String
+        let persistentCaseID: String
+        
         let locale: String
-        let id: String
         let title: String?
         let subtitle: String?
         let synonyms: String?
 
         enum CodingKeys: String, CodingKey {
-            case typeID = "typeId"
+            case persistentEnumerationID = "typeId"
+            case persistentCaseID = "id"
             case locale = "locale"
-            case id = "id"
             case title = "title"
             case subtitle = "subtitle"
             case synonyms = "synonyms"
@@ -200,8 +201,8 @@ enum RawRows {
     }
 
     struct ParameterLocalizationRow: Codable {
-        let toolID: Int
-        let key: String
+        let transientToolID: Int
+        let persistentParameterID: String
         let locale: String
         let name: String
         let description: String?
@@ -209,8 +210,8 @@ enum RawRows {
         let falseString: String?
 
         enum CodingKeys: String, CodingKey {
-            case toolID = "toolId"
-            case key = "key"
+            case transientToolID = "toolId"
+            case persistentParameterID = "key"
             case locale = "locale"
             case name = "name"
             case description = "description"
@@ -220,73 +221,73 @@ enum RawRows {
     }
 
     struct ParameterRow: Codable {
-        let typeInstance: String
-        let key: String
+        let transientToolID: Int
+        let persistentParameterID: String
+        let typeInstanceBlob: String
         let sortOrder: Int
-        let relationships: String
         let flags: Int
-        let toolID: Int
+        let relationshipsBlob: String
 
         enum CodingKeys: String, CodingKey {
-            case typeInstance = "typeInstance"
-            case key = "key"
+            case transientToolID = "toolId"
+            case persistentParameterID = "key"
+            case typeInstanceBlob = "typeInstance"
             case sortOrder = "sortOrder"
-            case relationships = "relationships"
             case flags = "flags"
-            case toolID = "toolId"
+            case relationshipsBlob = "relationships"
         }
     }
 
     struct PredicateTemplateRow: Codable {
-        let typeID: String
-        let comparison: String
+        let persistentTypeID: String
+        let comparisonBlob: String
 
         enum CodingKeys: String, CodingKey {
-            case typeID = "typeId"
-            case comparison = "comparison"
+            case persistentTypeID = "typeId"
+            case comparisonBlob = "comparison"
         }
     }
 
     struct SearchKeywordRow: Codable {
-        let toolID: Int
+        let transientToolID: Int
         let locale: String
         let keyword: String
-        let order: Int
+        let sortOrder: Int
 
         enum CodingKeys: String, CodingKey {
-            case toolID = "toolId"
+            case transientToolID = "toolId"
             case locale = "locale"
             case keyword = "keyword"
-            case order = "order"
+            case sortOrder = "order"
         }
     }
 
     struct SystemToolProtocolRow: Codable {
-        let toolID: Int
-        let identifier: String
-        let nameProtocol: String
+        let transientToolID: Int
+        let persistentProtocolID: String
+        let protocolBlob: String
 
         enum CodingKeys: String, CodingKey {
-            case toolID = "toolId"
-            case identifier = "identifier"
-            case nameProtocol = "protocol"
+            case transientToolID = "toolId"
+            case persistentProtocolID = "identifier"
+            case protocolBlob = "protocol"
         }
     }
 
     struct SystemTypeProtocolRow: Codable {
-        let typeID: String
-        let identifier: String
-        let `protocol`: String
+        let persistentTypeID: String
+        let persistentProtocolID: String
+        let protocolBlob: String
 
         enum CodingKeys: String, CodingKey {
-            case typeID = "typeId"
-            case identifier = "identifier"
-            case `protocol` = "protocol"
+            case persistentTypeID = "typeId"
+            case persistentProtocolID = "identifier"
+            case protocolBlob = "protocol"
         }
     }
 
     struct ToolLocalizationRow: Codable {
-        let toolID: Int
+        let transientToolID: Int
         let locale: String
         let name: String
         let outputResultName: String?
@@ -299,7 +300,7 @@ enum RawRows {
         let localizationUsage: String
 
         enum CodingKeys: String, CodingKey {
-            case toolID = "toolId"
+            case transientToolID = "toolId"
             case locale = "locale"
             case name = "name"
             case outputResultName = "outputResultName"
@@ -314,68 +315,68 @@ enum RawRows {
     }
 
     struct ToolOutputTypeRow: Codable {
-        let toolID: Int
-        let typeIdentifier: String
+        let transientToolID: Int
+        let persistentTypeID: String
 
         enum CodingKeys: String, CodingKey {
-            case toolID = "toolId"
-            case typeIdentifier = "typeIdentifier"
+            case transientToolID = "toolId"
+            case persistentTypeID = "typeIdentifier"
         }
     }
 
     struct ToolParameterTypeRow: Codable {
-        let toolID: Int
-        let key: String
-        let typeID: String
+        let transientToolID: Int
+        let persistentParameterID: String
+        let persistentTypeID: String
 
         enum CodingKeys: String, CodingKey {
-            case toolID = "toolId"
-            case key = "key"
-            case typeID = "typeId"
+            case transientToolID = "toolId"
+            case persistentParameterID = "key"
+            case persistentTypeID = "typeId"
         }
     }
 
     struct ToolRow: Codable {
-        let rowID: Int
-        let id: String
+        let transientToolID: Int
+        let persistentToolID: String
         let toolType: String
         let flags: Int
         let visibilityFlags: Int
-        let requirements: String
+        let requirementsBlob: String
         let authenticationPolicy: String
-        let customIcon: String?
+        let customIconBlob: String?
         let deprecationReplacementID: String?
         let sourceActionProvider: String
-        let outputTypeInstance: String
-        let sourceContainerID: Int
-        let attributionContainerID: Int?
+        let outputTypeInstanceBlob: String
+        let transientSourceContainerID: Int
+        let transientAttributionContainerID: Int?
 
         enum CodingKeys: String, CodingKey {
-            case rowID = "rowId"
-            case id = "id"
+            case transientToolID = "rowId"
+            case persistentToolID = "id"
             case toolType = "toolType"
             case flags = "flags"
             case visibilityFlags = "visibilityFlags"
-            case requirements = "requirements"
+            case requirementsBlob = "requirements"
             case authenticationPolicy = "authenticationPolicy"
-            case customIcon = "customIcon"
+            case customIconBlob = "customIcon"
             case deprecationReplacementID = "deprecationReplacementId"
             case sourceActionProvider = "sourceActionProvider"
-            case outputTypeInstance = "outputTypeInstance"
-            case sourceContainerID = "sourceContainerId"
-            case attributionContainerID = "attributionContainerId"
+            case outputTypeInstanceBlob = "outputTypeInstance"
+            case transientSourceContainerID = "sourceContainerId"
+            case transientAttributionContainerID = "attributionContainerId"
         }
     }
 
     struct TriggerLocalizationRow: Codable {
-        let triggerID: Int
+        let transientTriggerID: Int
         let locale: String
         let name: String
         let outputResultName: String?
         let descriptionSummary: String
 
         enum CodingKeys: String, CodingKey {
-            case triggerID = "triggerId"
+            case transientTriggerID = "triggerId"
             case locale = "locale"
             case name = "name"
             case outputResultName = "outputResultName"
@@ -384,25 +385,25 @@ enum RawRows {
     }
 
     struct TriggerOutputTypeRow: Codable {
-        let triggerID: Int
-        let typeIdentifier: String
+        let transientTriggerID: Int
+        let persistentTypeID: String
 
         enum CodingKeys: String, CodingKey {
-            case triggerID = "triggerId"
-            case typeIdentifier = "typeIdentifier"
+            case transientTriggerID = "triggerId"
+            case persistentTypeID = "typeIdentifier"
         }
     }
 
     struct TriggerParameterLocalizationRow: Codable {
-        let triggerID: Int
-        let key: String
+        let transientTriggerID: Int
+        let persistentTriggerParameterID: String
         let locale: String
         let name: String
         let description: String?
 
         enum CodingKeys: String, CodingKey {
-            case triggerID = "triggerId"
-            case key = "key"
+            case transientTriggerID = "triggerId"
+            case persistentTriggerParameterID = "key"
             case locale = "locale"
             case name = "name"
             case description = "description"
@@ -410,92 +411,92 @@ enum RawRows {
     }
 
     struct TriggerParameterRow: Codable {
-        let typeInstance: String
-        let key: String
+        let transientTriggerID: Int
+        let persistentTriggerParameterID: String
+        let persistentTypeID: String
         let sortOrder: Int
-        let relationships: String
         let flags: Int
-        let typeID: String
-        let triggerID: Int
+        let typeInstanceBlob: String
+        let relationshipsBlob: String
 
         enum CodingKeys: String, CodingKey {
-            case typeInstance = "typeInstance"
-            case key = "key"
+            case transientTriggerID = "triggerId"
+            case persistentTriggerParameterID = "key"
+            case persistentTypeID = "typeId"
             case sortOrder = "sortOrder"
-            case relationships = "relationships"
             case flags = "flags"
-            case typeID = "typeId"
-            case triggerID = "triggerId"
+            case typeInstanceBlob = "typeInstance"
+            case relationshipsBlob = "relationships"
         }
     }
 
     struct TriggerRow: Codable {
-        let rowID: Int
-        let id: String
+        let transientTriggerID: Int
+        let persistentTriggerID: String
         let flags: Int
-        let requirements: String
-        let outputTypeInstance: String
+        let requirementsBlob: String
+        let outputTypeInstanceBlob: String
 
         enum CodingKeys: String, CodingKey {
-            case rowID = "rowId"
-            case id = "id"
+            case transientTriggerID = "rowId"
+            case persistentTriggerID = "id"
             case flags = "flags"
-            case requirements = "requirements"
-            case outputTypeInstance = "outputTypeInstance"
+            case requirementsBlob = "requirements"
+            case outputTypeInstanceBlob = "outputTypeInstance"
         }
     }
 
     struct TypeCoercionRow: Codable {
-        let typeID: String
-        let coercionDefinition: String
+        let persistentTypeID: String
+        let coercionDefinitionBlob: String
 
         enum CodingKeys: String, CodingKey {
-            case typeID = "typeId"
-            case coercionDefinition = "coercionDefinition"
+            case persistentTypeID = "typeId"
+            case coercionDefinitionBlob = "coercionDefinition"
         }
     }
 
     struct TypeDisplayRepresentationRow: Codable {
-        let typeID: String
+        let persistentTypeID: String
         let locale: String
         let name: String
         let numericFormat: String?
-        let synonyms: String
+        let synonymsBlob: String
 
         enum CodingKeys: String, CodingKey {
-            case typeID = "typeId"
+            case persistentTypeID = "typeId"
             case locale = "locale"
             case name = "name"
             case numericFormat = "numericFormat"
-            case synonyms = "synonyms"
+            case synonymsBlob = "synonyms"
         }
     }
 
     struct TypeRow: Codable {
-        let rowID: String
-        let id: String
-        let sourceContainerID: Int
+        let persistentTypeID: String
+        let persistentTypeIDBlob: String
+        let transientSourceContainerID: Int
         let kind: Int
         let runtimeFlags: Int?
-        let runtimeRequirements: String?
+        let runtimeRequirementsBlob: String?
 
         enum CodingKeys: String, CodingKey {
-            case rowID = "rowId"
-            case id = "id"
-            case sourceContainerID = "sourceContainerId"
+            case persistentTypeID = "rowId"
+            case persistentTypeIDBlob = "id"
+            case transientSourceContainerID = "sourceContainerId"
             case kind = "kind"
             case runtimeFlags = "runtimeFlags"
-            case runtimeRequirements = "runtimeRequirements"
+            case runtimeRequirementsBlob = "runtimeRequirements"
         }
     }
 
     struct UTTypeCoercionRow: Codable {
-        let typeID: String
-        let coercionIdentifier: String
+        let persistentTypeID: String
+        let coercionUTI: String
 
         enum CodingKeys: String, CodingKey {
-            case typeID = "typeId"
-            case coercionIdentifier = "coercionIdentifier"
+            case persistentTypeID = "typeId"
+            case coercionUTI = "coercionIdentifier"
         }
     }
 }
