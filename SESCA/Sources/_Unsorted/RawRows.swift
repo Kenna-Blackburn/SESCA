@@ -44,6 +44,38 @@ struct RawSQLite {
     let typeDisplayRepresentationRows: [RawSQLite.TypeDisplayRepresentationRow]
     let typeRows: [RawSQLite.TypeRow]
     let utTypeCoercionRows: [RawSQLite.UTTypeCoercionRow]
+    
+    lazy var additionalToolAttributionContainerRowsKeyedByTransientContainerID = Dictionary(additionalToolAttributionContainerRows, keyedBy: \.transientContainerID)
+    lazy var categoryRowsKeyedByTransientToolID = Dictionary(categoryRows, keyedBy: \.transientToolID)
+    lazy var containerMetadataLocalizationRowsKeyedByTransientContainerID = Dictionary(containerMetadataLocalizationRows, keyedBy: \.transientContainerID)
+    lazy var containerMetadataRowsKeyedByTransientContainerID = Dictionary(containerMetadataRows, keyedBy: \.transientContainerID)
+    lazy var containerMetadataSynonymRowsKeyedByTransientContainerID = Dictionary(containerMetadataSynonymRows, keyedBy: \.transientContainerID)
+//    lazy var entityPropertyLocalizationRowsKeyedBy<#Key#> = Dictionary(entityPropertyLocalizationRows, keyedBy: <#T##KeyPath<Value, Hashable>#>) // double key
+    lazy var entityPropertyRowsKeyedByPersistentEntityID = Dictionary(entityPropertyRows, groupedBy: \.persistentEntityID) // plural value
+    lazy var enumerationCaseRowsKeyedByPersistentEnumerationID = Dictionary(enumerationCaseRows, groupedBy: \.persistentEnumerationID) // plural value
+    lazy var linkActionIdentifierRowsKeyedByTransientToolID = Dictionary(linkActionIdentifierRows, keyedBy: \.transientToolID)
+    lazy var linkStateRowsKeyedByPersistentContainerID = Dictionary(linkStateRows, keyedBy: \.persistentContainerID)
+    lazy var metadataRowsKeyedByMetadataKey = Dictionary(metadataRows, keyedBy: \.key)
+//    lazy var parameterLocalizationRowsKeyedBy<#Key#> = Dictionary(parameterLocalizationRows, keyedBy: <#T##KeyPath<Value, Hashable>#>) // double key
+    lazy var parameterRowsKeyedByTransientToolID = Dictionary(parameterRows, groupedBy: \.transientToolID) // plural value
+    lazy var predicateTemplateRowsKeyedByPersistentTypeID = Dictionary(predicateTemplateRows, keyedBy: \.persistentTypeID)
+    lazy var searchKeywordRowsKeyedByTransientToolID = Dictionary(searchKeywordRows, groupedBy: \.transientToolID) // plural value
+    lazy var systemToolProtocolRowsKeyedByTransientToolID = Dictionary(systemToolProtocolRows, groupedBy: \.transientToolID) // plural value
+    lazy var systemTypeProtocolRowsKeyedByPersistentTypeID = Dictionary(systemTypeProtocolRows, groupedBy: \.persistentTypeID) // plural value
+    lazy var toolLocalizationRowsKeyedByTransientToolID = Dictionary(toolLocalizationRows, keyedBy: \.transientToolID)
+    lazy var toolOutputTypeRowsKeyedByTransientToolID = Dictionary(toolOutputTypeRows, keyedBy: \.transientToolID)
+//    lazy var toolParameterTypeRowsKeyedBy<#Key#> = Dictionary(toolParameterTypeRows, keyedBy: <#T##KeyPath<Value, Hashable>#>) // double key
+    lazy var toolRowsKeyedByTransientToolID = Dictionary(toolRows, keyedBy: \.transientToolID)
+    lazy var triggerLocalizationRowsKeyedByTransientTriggerID = Dictionary(triggerLocalizationRows, keyedBy: \.transientTriggerID)
+    lazy var triggerOutputTypeRowsKeyedByTransientTriggerID = Dictionary(triggerOutputTypeRows, keyedBy: \.transientTriggerID)
+//    lazy var triggerParameterLocalizationRowsKeyedBy<#Key#> = Dictionary(triggerParameterLocalizationRows, keyedBy: <#T##KeyPath<Value, Hashable>#>) // double key
+//    lazy var triggerParameterRowsKeyedBy<#Key#> = Dictionary(triggerParameterRows, keyedBy: <#T##KeyPath<Value, Hashable>#>) // double key
+    lazy var triggerRowsKeyedByTransientTriggerID = Dictionary(triggerRows, keyedBy: \.transientTriggerID)
+    lazy var typeCoercionRowsKeyedByPersistentTypeID = Dictionary(typeCoercionRows, keyedBy: \.persistentTypeID)
+    lazy var typeDisplayRepresentationRowsKeyedByPersistentTypeID = Dictionary(typeDisplayRepresentationRows, keyedBy: \.persistentTypeID)
+    lazy var typeRowsKeyedByPersistentTypeID = Dictionary(typeRows, keyedBy: \.persistentTypeID)
+    lazy var typeRowsKeyedByPersistentTypeIDBlob = Dictionary(typeRows, keyedBy: \.persistentTypeIDBlob)
+    lazy var utTypeCoercionRowsKeyedByPersistentTypeID = Dictionary(utTypeCoercionRows, keyedBy: \.persistentTypeID)
 }
 
 extension RawSQLite {
@@ -172,21 +204,21 @@ extension RawSQLite {
 
     struct LinkActionIdentifierRow: Codable {
         let identifier: String
-        let toolID: Int
+        let transientToolID: Int
 
         enum CodingKeys: String, CodingKey {
             case identifier = "identifier"
-            case toolID = "toolId"
+            case transientToolID = "toolId"
         }
     }
 
     struct LinkStateRow: Codable {
-        let containerID: String
-        let installIdentifier: String
+        let persistentContainerID: String
+        let installIdentifierBlob: String
 
         enum CodingKeys: String, CodingKey {
-            case containerID = "containerId"
-            case installIdentifier = "installIdentifier"
+            case persistentContainerID = "containerId"
+            case installIdentifierBlob = "installIdentifier"
         }
     }
 
