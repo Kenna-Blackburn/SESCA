@@ -45,37 +45,160 @@ struct RawSQLite {
     let typeRows: [RawSQLite.TypeRow]
     let utTypeCoercionRows: [RawSQLite.UTTypeCoercionRow]
     
-    lazy var additionalToolAttributionContainerRowsKeyedByTransientContainerID = Dictionary(additionalToolAttributionContainerRows, keyedBy: \.transientContainerID)
-    lazy var categoryRowsKeyedByTransientToolID = Dictionary(categoryRows, keyedBy: \.transientToolID)
-    lazy var containerMetadataLocalizationRowsKeyedByTransientContainerID = Dictionary(containerMetadataLocalizationRows, keyedBy: \.transientContainerID)
-    lazy var containerMetadataRowsKeyedByTransientContainerID = Dictionary(containerMetadataRows, keyedBy: \.transientContainerID)
-    lazy var containerMetadataSynonymRowsKeyedByTransientContainerID = Dictionary(containerMetadataSynonymRows, keyedBy: \.transientContainerID)
-//    lazy var entityPropertyLocalizationRowsKeyedBy<#Key#> = Dictionary(entityPropertyLocalizationRows, keyedBy: <#T##KeyPath<Value, Hashable>#>) // double key
-    lazy var entityPropertyRowsKeyedByPersistentEntityID = Dictionary(entityPropertyRows, groupedBy: \.persistentEntityID) // plural value
-    lazy var enumerationCaseRowsKeyedByPersistentEnumerationID = Dictionary(enumerationCaseRows, groupedBy: \.persistentEnumerationID) // plural value
-    lazy var linkActionIdentifierRowsKeyedByTransientToolID = Dictionary(linkActionIdentifierRows, keyedBy: \.transientToolID)
-    lazy var linkStateRowsKeyedByPersistentContainerID = Dictionary(linkStateRows, keyedBy: \.persistentContainerID)
-    lazy var metadataRowsKeyedByMetadataKey = Dictionary(metadataRows, keyedBy: \.key)
-//    lazy var parameterLocalizationRowsKeyedBy<#Key#> = Dictionary(parameterLocalizationRows, keyedBy: <#T##KeyPath<Value, Hashable>#>) // double key
-    lazy var parameterRowsKeyedByTransientToolID = Dictionary(parameterRows, groupedBy: \.transientToolID) // plural value
-    lazy var predicateTemplateRowsKeyedByPersistentTypeID = Dictionary(predicateTemplateRows, keyedBy: \.persistentTypeID)
-    lazy var searchKeywordRowsKeyedByTransientToolID = Dictionary(searchKeywordRows, groupedBy: \.transientToolID) // plural value
-    lazy var systemToolProtocolRowsKeyedByTransientToolID = Dictionary(systemToolProtocolRows, groupedBy: \.transientToolID) // plural value
-    lazy var systemTypeProtocolRowsKeyedByPersistentTypeID = Dictionary(systemTypeProtocolRows, groupedBy: \.persistentTypeID) // plural value
-    lazy var toolLocalizationRowsKeyedByTransientToolID = Dictionary(toolLocalizationRows, keyedBy: \.transientToolID)
-    lazy var toolOutputTypeRowsKeyedByTransientToolID = Dictionary(toolOutputTypeRows, keyedBy: \.transientToolID)
-//    lazy var toolParameterTypeRowsKeyedBy<#Key#> = Dictionary(toolParameterTypeRows, keyedBy: <#T##KeyPath<Value, Hashable>#>) // double key
-    lazy var toolRowsKeyedByTransientToolID = Dictionary(toolRows, keyedBy: \.transientToolID)
-    lazy var triggerLocalizationRowsKeyedByTransientTriggerID = Dictionary(triggerLocalizationRows, keyedBy: \.transientTriggerID)
-    lazy var triggerOutputTypeRowsKeyedByTransientTriggerID = Dictionary(triggerOutputTypeRows, keyedBy: \.transientTriggerID)
-//    lazy var triggerParameterLocalizationRowsKeyedBy<#Key#> = Dictionary(triggerParameterLocalizationRows, keyedBy: <#T##KeyPath<Value, Hashable>#>) // double key
-//    lazy var triggerParameterRowsKeyedBy<#Key#> = Dictionary(triggerParameterRows, keyedBy: <#T##KeyPath<Value, Hashable>#>) // double key
-    lazy var triggerRowsKeyedByTransientTriggerID = Dictionary(triggerRows, keyedBy: \.transientTriggerID)
-    lazy var typeCoercionRowsKeyedByPersistentTypeID = Dictionary(typeCoercionRows, keyedBy: \.persistentTypeID)
-    lazy var typeDisplayRepresentationRowsKeyedByPersistentTypeID = Dictionary(typeDisplayRepresentationRows, keyedBy: \.persistentTypeID)
-    lazy var typeRowsKeyedByPersistentTypeID = Dictionary(typeRows, keyedBy: \.persistentTypeID)
-    lazy var typeRowsKeyedByPersistentTypeIDBlob = Dictionary(typeRows, keyedBy: \.persistentTypeIDBlob)
-    lazy var utTypeCoercionRowsKeyedByPersistentTypeID = Dictionary(utTypeCoercionRows, keyedBy: \.persistentTypeID)
+    lazy private(set) var additionalToolAttributionContainerRowsKeyedByTransientContainerID = Dictionary(
+        additionalToolAttributionContainerRows,
+        keyedBy: \.transientContainerID
+    )
+    
+    lazy private(set) var categoryRowsKeyedByTransientToolID = Dictionary(
+        categoryRows,
+        keyedBy: \.transientToolID
+    )
+    
+    lazy private(set) var containerMetadataLocalizationRowsKeyedByTransientContainerID = Dictionary(
+        containerMetadataLocalizationRows,
+        keyedBy: \.transientContainerID
+    )
+    
+    lazy private(set) var containerMetadataRowsKeyedByTransientContainerID = Dictionary(
+        containerMetadataRows,
+        keyedBy: \.transientContainerID
+    )
+    
+    lazy private(set) var containerMetadataSynonymRowsKeyedByTransientContainerID = Dictionary(
+        containerMetadataSynonymRows,
+        keyedBy: \.transientContainerID
+    )
+    
+//    lazy private(set) var entityPropertyLocalizationRowsKeyedBy<#Key#> = Dictionary(
+//        entityPropertyLocalizationRows,
+//        keyedBy: <#T##KeyPath<Value, Hashable>#>
+//    ) // double key
+    
+    lazy private(set) var entityPropertyRowsKeyedByPersistentEntityID = Dictionary(
+        entityPropertyRows,
+        groupedBy: \.persistentEntityID
+    ) // plural value
+    
+    lazy private(set) var enumerationCaseRowsKeyedByPersistentEnumerationID = Dictionary(
+        enumerationCaseRows,
+        groupedBy: \.persistentEnumerationID
+    ) // plural value
+    
+    lazy private(set) var linkActionIdentifierRowsKeyedByTransientToolID = Dictionary(
+        linkActionIdentifierRows,
+        keyedBy: \.transientToolID
+    )
+    
+    lazy private(set) var linkStateRowsKeyedByPersistentContainerID = Dictionary(
+        linkStateRows,
+        keyedBy: \.persistentContainerID
+    )
+    
+    lazy private(set) var metadataRowsKeyedByMetadataKey = Dictionary(
+        metadataRows,
+        keyedBy: \.key
+    )
+    
+//    lazy private(set) var parameterLocalizationRowsKeyedBy<#Key#> = Dictionary(
+//        parameterLocalizationRows,
+//        keyedBy: <#T##KeyPath<Value, Hashable>#>
+//    ) // double key
+    
+    lazy private(set) var parameterRowsKeyedByTransientToolID = Dictionary(
+        parameterRows,
+        groupedBy: \.transientToolID
+    ) // plural value
+    
+    lazy private(set) var predicateTemplateRowsKeyedByPersistentTypeID = Dictionary(
+        predicateTemplateRows,
+        keyedBy: \.persistentTypeID
+    )
+    
+    lazy private(set) var searchKeywordRowsKeyedByTransientToolID = Dictionary(
+        searchKeywordRows,
+        groupedBy: \.transientToolID
+    ) // plural value
+    
+    lazy private(set) var systemToolProtocolRowsKeyedByTransientToolID = Dictionary(
+        systemToolProtocolRows,
+        groupedBy: \.transientToolID
+    ) // plural value
+    
+    lazy private(set) var systemTypeProtocolRowsKeyedByPersistentTypeID = Dictionary(
+        systemTypeProtocolRows,
+        groupedBy: \.persistentTypeID
+    ) // plural value
+    
+    lazy private(set) var toolLocalizationRowsKeyedByTransientToolID = Dictionary(
+        toolLocalizationRows,
+        keyedBy: \.transientToolID
+    )
+    
+    lazy private(set) var toolOutputTypeRowsKeyedByTransientToolID = Dictionary(
+        toolOutputTypeRows,
+        keyedBy: \.transientToolID
+    )
+    
+//    lazy private(set) var toolParameterTypeRowsKeyedBy<#Key#> = Dictionary(
+//        toolParameterTypeRows,
+//        keyedBy: <#T##KeyPath<Value, Hashable>#>
+//    ) // double key
+    
+    lazy private(set) var toolRowsKeyedByTransientToolID = Dictionary(
+        toolRows,
+        keyedBy: \.transientToolID
+    )
+    
+    lazy private(set) var triggerLocalizationRowsKeyedByTransientTriggerID = Dictionary(
+        triggerLocalizationRows,
+        keyedBy: \.transientTriggerID
+    )
+    
+    lazy private(set) var triggerOutputTypeRowsKeyedByTransientTriggerID = Dictionary(
+        triggerOutputTypeRows,
+        keyedBy: \.transientTriggerID
+    )
+    
+//    lazy private(set) var triggerParameterLocalizationRowsKeyedBy<#Key#> = Dictionary(
+//        triggerParameterLocalizationRows,
+//        keyedBy: <#T##KeyPath<Value, Hashable>#>
+//    ) // double key
+//    
+//    lazy private(set) var triggerParameterRowsKeyedBy<#Key#> = Dictionary(
+//        triggerParameterRows,
+//        keyedBy: <#T##KeyPath<Value, Hashable>#>
+//    ) // double key
+    
+    lazy private(set) var triggerRowsKeyedByTransientTriggerID = Dictionary(
+        triggerRows,
+        keyedBy: \.transientTriggerID
+    )
+    
+    lazy private(set) var typeCoercionRowsKeyedByPersistentTypeID = Dictionary(
+        typeCoercionRows,
+        keyedBy: \.persistentTypeID
+    )
+    
+    lazy private(set) var typeDisplayRepresentationRowsKeyedByPersistentTypeID = Dictionary(
+        typeDisplayRepresentationRows,
+        keyedBy: \.persistentTypeID
+    )
+    
+    lazy private(set) var typeRowsKeyedByPersistentTypeID = Dictionary(
+        typeRows,
+        keyedBy: \.persistentTypeID
+    )
+    
+    lazy private(set) var typeRowsKeyedByPersistentTypeIDBlob = Dictionary(
+        typeRows,
+        keyedBy: \.persistentTypeIDBlob
+    )
+    
+    lazy private(set) var utTypeCoercionRowsKeyedByPersistentTypeID = Dictionary(
+        utTypeCoercionRows,
+        keyedBy: \.persistentTypeID
+    )
 }
 
 extension RawSQLite {
