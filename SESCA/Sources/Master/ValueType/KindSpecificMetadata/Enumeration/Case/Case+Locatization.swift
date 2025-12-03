@@ -11,7 +11,20 @@ extension Master.ValueType.KindSpecificMetadata.Enumeration.Case {
     struct Locatization: Codable, Hashable {
         let localeID: String
         
-        let title: String
+        let title: String?
         let subtitle: String?
+    }
+}
+
+extension Master.ValueType.KindSpecificMetadata.Enumeration.Case.Locatization {
+    init(
+        caseRow: RawSQLite.Tables.EnumerationCases.Row,
+        sqlite: RawSQLite,
+    ) throws {
+        self.localeID = caseRow.locale
+        
+        self.title = caseRow.title
+        
+        self.subtitle = caseRow.subtitle
     }
 }

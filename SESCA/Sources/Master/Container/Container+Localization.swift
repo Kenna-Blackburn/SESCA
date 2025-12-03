@@ -12,3 +12,19 @@ extension Master.Container {
         let name: String
     }
 }
+
+extension Master.Container.Localization {
+    init(
+        containerRow: RawSQLite.Tables.ContainerMetadata.Row,
+        sqlite: RawSQLite,
+    ) throws {
+        let containerLocalizationRow = try sqlite[RawSQLite.Tables.ContainerMetadataLocalizations.self]
+            .rows
+            .first(where: { $0.transientContainerID == containerRow.transientContainerID })
+            .unwrap(throwing: LocativeError())
+        
+        self.localeID = containerLocalizationRow.locale
+        
+        self.name = containerLocalizationRow.name
+    }
+}

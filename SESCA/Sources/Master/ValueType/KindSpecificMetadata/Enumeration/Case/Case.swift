@@ -14,7 +14,19 @@ extension Master.ValueType.KindSpecificMetadata.Enumeration {
         let persistentID: PersistentID
         
         let localization: Locatization
+    }
+}
+
+extension Master.ValueType.KindSpecificMetadata.Enumeration.Case {
+    init(
+        caseRow: RawSQLite.Tables.EnumerationCases.Row,
+        sqlite: RawSQLite,
+    ) throws {
+        self.persistentID = caseRow.persistentEnumerationID
         
-        
+        self.localization = try Master.ValueType.KindSpecificMetadata.Enumeration.Case.Locatization(
+            caseRow: caseRow,
+            sqlite: sqlite,
+        )
     }
 }

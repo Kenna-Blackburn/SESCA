@@ -13,8 +13,27 @@ extension Master.ValueType.KindSpecificMetadata.Entity {
         
         let persistentID: PersistentID
         
-        let localization: Locatization
+        let localization: Master.ValueType.KindSpecificMetadata.Entity.Property.Locatization
         
         let _typeInstance: Master.ValueType._Instance
+    }
+}
+
+extension Master.ValueType.KindSpecificMetadata.Entity.Property {
+    init(
+        propertyRow: RawSQLite.Tables.EntityProperties.Row,
+        sqlite: RawSQLite,
+    ) throws {
+        self.persistentID = propertyRow.persistentPropertyID
+        
+        self.localization = try Master.ValueType.KindSpecificMetadata.Entity.Property.Locatization(
+            propertyRow: propertyRow,
+            sqlite: sqlite,
+        )
+        
+        self._typeInstance = try propertyRow
+            .typeInstanceBlob
+            .data(using: .utf8)
+            .unwrap(throwing: LocativeError())
     }
 }

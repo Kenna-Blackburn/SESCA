@@ -11,12 +11,10 @@ extension Master.Action.Parameter.Localization {
         var falseString: String?
         
         init?(
-            true trueString: String? = nil,
-            false falseString: String? = nil,
+            true trueString: String?,
+            false falseString: String?,
         ) {
-            guard trueString != nil &&
-                    falseString != nil
-            else {
+            guard trueString != nil && falseString != nil else {
                 return nil
             }
             

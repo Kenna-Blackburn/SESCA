@@ -16,82 +16,84 @@ extension Master {
         let parameters: [Parameter]
         let outputTypeID: ValueType.PersistentID
         
-        let authenticationPolicy: AuthenticationPolicy?
-        
         let sourceContainerID: Container.PersistentID
         let attributionContainerID: Container.PersistentID?
         
-        let localization: Localization
+        let localization: Master.Action.Localization
         
         let _flags: Int
         let _visibilityFlags: Int
         let _requirements: Data
+        let _authenticationPolicy: String
         let _customIcon: Data?
         let _sourceActionProviderID: String
         let _outputTypeInstance: ValueType._Instance
-        
-        enum AuthenticationPolicy: String, Codable, Hashable {
-            case requiresAuthenticationOnOriginAndRemote
-            case requiresAuthenticationOnOrigin
-        }
     }
 }
 
 extension Master.Action {
     init(
-        rawToolRow: RawRows.ToolRow,
-        tableBundle: RawRows.Bundle,
+        toolRow: RawSQLite.Tables.Tools.Row,
+        sqlite: RawSQLite,
     ) throws {
-        self.persistentID = rawToolRow.id
+        self.persistentID = toolRow.persistentToolID
         
-        self.parameters = try tableBundle
-            .rawParameterRows
-            .filter({ $0.toolID == rawToolRow.rowID })
+        self.parameters = try sqlite[RawSQLite.Tables.Parameters.self]
+            .rows
+            .filter({ $0.transientToolID == toolRow.transientToolID })
             .sorted(using: SortDescriptor(\.sortOrder))
-            .map({ try Master.Action.Parameter(rawParameterRow: $0, tableBundle: tableBundle) })
+            .map({ try Master.Action.Parameter(parameterRow: $0, sqlite: sqlite) })
         
-        self.outputTypeID = try tableBundle
-            .rawToolOutputTypeRows
-            .first(where: { $0.toolID == rawToolRow.rowID })
+        self.outputTypeID = try sqlite[RawSQLite.Tables.ToolOutputTypes.self]
+            .rows
+            .first(where: { $0.transientToolID == toolRow.transientToolID })
             .unwrap(throwing: LocativeError())
-            .typeIdentifier
+            .persistentTypeID
         
-        self.authenticationPolicy = Master.Action.AuthenticationPolicy(rawValue: rawToolRow.authenticationPolicy)
-        
-        self.sourceContainerID = try tableBundle
-            .rawContainerMetadataRows
-            .first(where: { $0.rowID == rawToolRow.sourceContainerID })
+        self.sourceContainerID = try sqlite[RawSQLite.Tables.ContainerMetadata.self]
+            .rows
+            .first(where: { $0.transientContainerID == toolRow.transientSourceContainerID })
             .unwrap(throwing: LocativeError())
-            .id
+            .persistentContainerID
         
-        self.attributionContainerID = tableBundle
-            .rawContainerMetadataRows
-            .first(where: { $0.rowID == rawToolRow.attributionContainerID })?
-            .id
+        if let transientAttributionContainerID = toolRow.transientAttributionContainerID {
+            self.attributionContainerID = try sqlite[RawSQLite.Tables.ContainerMetadata.self]
+                .rows
+                .first(where: { $0.transientContainerID == transientAttributionContainerID })
+                .unwrap(throwing: LocativeError())
+                .persistentContainerID
+        } else {
+            self.attributionContainerID = nil
+        }
         
-        self.localization = try Master.Action.Localization(rawToolRow: rawToolRow, tableBundle: tableBundle)
+        self.localization = try Master.Action.Localization(
+            toolRow: toolRow,
+            sqlite: sqlite,
+        )
         
-        self._flags = rawToolRow.flags
+        self._flags = toolRow.flags
         
-        self._visibilityFlags = rawToolRow.visibilityFlags
+        self._visibilityFlags = toolRow.visibilityFlags
         
-        self._requirements = try rawToolRow
-            .requirements
+        self._requirements = try toolRow
+            .requirementsBlob
             .data(using: .utf8)
             .unwrap(throwing: LocativeError())
         
-        self._customIcon = try rawToolRow
-            .customIcon
-            .map {
-                try $0
-                    .data(using: .utf8)
-                    .unwrap(throwing: LocativeError())
-            }
+        self._authenticationPolicy = toolRow.authenticationPolicy
         
-        self._sourceActionProviderID = rawToolRow.sourceActionProvider
+        if let customIconBlob = toolRow.customIconBlob {
+            self._customIcon = try customIconBlob
+                .data(using: .utf8)
+                .unwrap(throwing: LocativeError())
+        } else {
+            self._customIcon = nil
+        }
         
-        self._outputTypeInstance = try rawToolRow
-            .outputTypeInstance
+        self._sourceActionProviderID = toolRow.sourceActionProvider
+        
+        self._outputTypeInstance = try toolRow
+            .outputTypeInstanceBlob
             .data(using: .utf8)
             .unwrap(throwing: LocativeError())
     }

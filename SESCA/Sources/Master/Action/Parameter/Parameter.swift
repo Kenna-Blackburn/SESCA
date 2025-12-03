@@ -9,11 +9,13 @@ import Foundation
 
 extension Master.Action {
     struct Parameter: Codable, Hashable {
-        let key: String
+        typealias PersistentID = String
+        
+        let persistentID: PersistentID
         
         let inputTypeID: Master.ValueType.PersistentID
         
-        let localization: Localization
+        let localization: Master.Action.Parameter.Localization
         
         let _inputTypeInstance: Master.ValueType._Instance
         let _relationships: Data
@@ -23,69 +25,35 @@ extension Master.Action {
 
 extension Master.Action.Parameter {
     init(
-        rawParameterRow: RawRows.ParameterRow,
-        tableBundle: RawRows.Bundle,
+        parameterRow: RawSQLite.Tables.Parameters.Row,
+        sqlite: RawSQLite,
     ) throws {
-        try {
-            try tableBundle
-                .rawParameterRows
-                .filter({ $0.toolID == rawToolRow.rowID })
-                .sorted(using: SortDescriptor(\.sortOrder))
-                .map { rawParameterRow in
-                    Master.Action.Parameter(
-                        key: rawParameterRow.key,
-                        inputTypeID: try {
-                            try tableBundle
-                                .rawToolParameterTypeRows
-                                .first {
-                                    $0.key == rawParameterRow.key &&
-                                    $0.toolID == rawToolRow.rowID
-                                }
-                                .unwrap(throwing: LocativeError())
-                                .typeID
-                        }(),
-                        localization: try {
-                            let rawParameterLocalizationRow = try tableBundle
-                                .rawParameterLocalizationRows
-                                .first {
-                                    $0.key == rawParameterRow.key &&
-                                    $0.toolID == rawToolRow.rowID
-                                }
-                                .unwrap(throwing: LocativeError())
-                            
-                            return Master.Action.Parameter.Localization(
-                                localeID: rawParameterLocalizationRow.locale,
-                                name: rawParameterLocalizationRow.name,
-                                descriptionSummary: rawParameterLocalizationRow.description,
-                                booleanDisplay: {
-                                    if rawParameterLocalizationRow.trueString == nil,
-                                       rawParameterLocalizationRow.falseString == nil
-                                    {
-                                        return nil
-                                    } else {
-                                        return Master.Action.Parameter.Localization.BooleanDisplay(
-                                            true: rawParameterLocalizationRow.trueString,
-                                            false: rawParameterLocalizationRow.falseString
-                                        )
-                                    }
-                                }(),
-                            )
-                        }(),
-                        _inputTypeInstance: try {
-                            try rawParameterRow
-                                .typeInstance
-                                .data(using: .utf8)
-                                .unwrap(throwing: LocativeError())
-                        }(),
-                        _relationships: try {
-                            try rawParameterRow
-                                .relationships
-                                .data(using: .utf8)
-                                .unwrap(throwing: LocativeError())
-                        }(),
-                        _flags: rawParameterRow.flags
-                    )
-                }
-        }()
+        self.persistentID = parameterRow.persistentParameterID
+        
+        self.inputTypeID = try sqlite[RawSQLite.Tables.ToolParameterTypes.self]
+            .rows
+            .first {
+                $0.transientToolID == parameterRow.transientToolID ||
+                $0.persistentParameterID == parameterRow.persistentParameterID
+            }
+            .unwrap(throwing: LocativeError())
+            .persistentTypeID
+        
+        self.localization = try Master.Action.Parameter.Localization(
+            parameterRow: parameterRow,
+            sqlite: sqlite,
+        )
+        
+        self._inputTypeInstance = try parameterRow
+            .typeInstanceBlob
+            .data(using: .utf8)
+            .unwrap(throwing: LocativeError())
+        
+        self._relationships = try parameterRow
+            .relationshipsBlob
+            .data(using: .utf8)
+            .unwrap(throwing: LocativeError())
+        
+        self._flags = parameterRow.flags
     }
 }

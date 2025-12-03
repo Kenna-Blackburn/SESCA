@@ -14,3 +14,22 @@ extension Master.ValueType.KindSpecificMetadata.Entity.Property {
         let name: String
     }
 }
+
+extension Master.ValueType.KindSpecificMetadata.Entity.Property.Locatization {
+    init(
+        propertyRow: RawSQLite.Tables.EntityProperties.Row,
+        sqlite: RawSQLite,
+    ) throws {
+        let propertyLocalizationRow = try sqlite[RawSQLite.Tables.EntityPropertyLocalizations.self]
+            .rows
+            .first {
+                $0.persistentEntityID == propertyRow.persistentEntityID &&
+                $0.persistentPropertyID == propertyRow.persistentPropertyID
+            }
+            .unwrap(throwing: LocativeError())
+        
+        self.localeID = propertyLocalizationRow.locale
+        
+        self.name = propertyLocalizationRow.displayName
+    }
+}

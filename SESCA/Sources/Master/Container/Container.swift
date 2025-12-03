@@ -14,9 +14,9 @@ extension Master {
         let persistentID: PersistentID
         
         let bundleVersionString: String
-        let teamID: String?
+        let teamID: String
         
-        let localization: Localization
+        let localization: Master.Container.Localization
         
         let _origin: Int
         let _containerType: Int
@@ -25,9 +25,22 @@ extension Master {
 
 extension Master.Container {
     init(
-        rawContainerMetadataRow: RawRows.ContainerMetadataRow,
-        tableBundle: RawRows.Bundle,
+        containerRow: RawSQLite.Tables.ContainerMetadata.Row,
+        sqlite: RawSQLite,
     ) throws {
+        self.persistentID = containerRow.persistentContainerID
         
+        self.bundleVersionString = containerRow.bundleVersion
+        
+        self.teamID = containerRow.teamID
+        
+        self.localization = try Master.Container.Localization(
+            containerRow: containerRow,
+            sqlite: sqlite,
+        )
+        
+        self._origin = containerRow.origin
+        
+        self._containerType = containerRow.containerType
     }
 }

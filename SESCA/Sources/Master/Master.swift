@@ -8,24 +8,28 @@
 import Foundation
 
 struct Master: Codable, Hashable {
-    let actions: Set<Action>
+    let actions: [Action]
     
-    let valueTypes: Set<ValueType>
+    let valueTypes: [ValueType]
     
-    let containers: Set<Container>
+    let containers: [Container]
 }
 
 extension Master {
-    init(tableBundle: RawRows.Bundle) throws {
-        func helper<Row, MasterType>(
-            _ keyPath: KeyPath<RawRows.Bundle, [Row]>,
-            _ initializer: (Row, RawRows.Bundle) throws -> MasterType
-        ) throws -> Set<MasterType> {
-            Set(try tableBundle[keyPath: keyPath].map({ try initializer($0, tableBundle) }))
-        }
+    init(sqlite: RawSQLite) throws {
+        self.actions = try sqlite[RawSQLite.Tables.Tools.self]
+            .rows
+            .map({ try Master.Action(toolRow: $0, sqlite: sqlite) })
+            .sorted(using: SortDescriptor(\.persistentID))
         
-        self.actions = try helper(\.rawToolRows, Master.Action.init)
-        self.valueTypes = try helper(\.rawTypeRows, Master.ValueType.init)
-        self.containers = try helper(\.rawContainerMetadataRows, Master.Container.init)
+        self.valueTypes = try sqlite[RawSQLite.Tables.Types.self]
+            .rows
+            .map({ try Master.ValueType(typeRow: $0, sqlite: sqlite) })
+            .sorted(using: SortDescriptor(\.persistentID))
+        
+        self.containers = try sqlite[RawSQLite.Tables.ContainerMetadata.self]
+            .rows
+            .map({ try Master.Container(containerRow: $0, sqlite: sqlite) })
+            .sorted(using: SortDescriptor(\.persistentID))
     }
 }

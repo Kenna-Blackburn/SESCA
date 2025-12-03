@@ -28,40 +28,46 @@ extension Master.Action {
 
 extension Master.Action.Localization {
     init(
-        rawToolRow: RawRows.ToolRow,
-        tableBundle: RawRows.Bundle
+        toolRow: RawSQLite.Tables.Tools.Row,
+        sqlite: RawSQLite
     ) throws {
-        let rawToolLocalizationRow = try tableBundle
-            .rawToolLocalizationRows
-            .first(where: { $0.toolID == rawToolRow.rowID })
+        let toolLocalizationRow = try sqlite[RawSQLite.Tables.ToolLocalizations.self]
+            .rows
+            .first(where: { $0.transientToolID == toolRow.transientToolID })
             .unwrap(throwing: LocativeError())
         
-        return Master.Action.Localization(
-            localeID: rawToolLocalizationRow.locale,
-            name: rawToolLocalizationRow.name,
-            descriptionSummary: rawToolLocalizationRow.descriptionSummary,
-            descriptionRequirements: rawToolLocalizationRow.descriptionRequires,
-            descriptionNote: rawToolLocalizationRow.descriptionNote,
-            descriptionAttribution: rawToolLocalizationRow.descriptionAttribution,
-            outputName: rawToolLocalizationRow.outputResultName,
-            outputDescription: rawToolLocalizationRow.descriptionResult,
-            category: {
-                tableBundle
-                    .rawCategoryRows
-                    .first {
-                        $0.toolID == rawToolRow.rowID &&
-                        $0.locale == rawToolLocalizationRow.locale
-                    }?
-                    .category
-            }(),
-            searchKeywords: {
-                tableBundle
-                    .rawSearchKeywordRows
-                    .filter({ $0.locale == rawToolLocalizationRow.locale })
-                    .filter({ $0.toolID == rawToolRow.rowID })
-                    .sorted(using: SortDescriptor(\.order))
-                    .map(\.keyword)
-            }()
-        )
+        self.localeID = toolLocalizationRow.locale
+        
+        self.name = toolLocalizationRow.name
+        
+        self.descriptionSummary = toolLocalizationRow.descriptionSummary
+        
+        self.descriptionRequirements = toolLocalizationRow.descriptionRequires
+        
+        self.descriptionNote = toolLocalizationRow.descriptionNote
+        
+        self.descriptionAttribution = toolLocalizationRow.descriptionAttribution
+        
+        self.outputName = toolLocalizationRow.outputResultName
+        
+        self.outputDescription = toolLocalizationRow.descriptionResult
+        
+        self.category = sqlite[RawSQLite.Tables.Categories.self]
+            .rows
+            .first {
+                $0.transientToolID == toolRow.transientToolID &&
+                $0.locale == toolLocalizationRow.locale
+            }?
+            .category
+        
+        self.searchKeywords = sqlite[RawSQLite.Tables.SearchKeywords.self]
+            .rows
+            .filter {
+                $0.transientToolID == toolRow.transientToolID &&
+                $0.locale == toolLocalizationRow.locale
+            }
+            .sorted(using: SortDescriptor(\.sortOrder))
+            .map(\.keyword)
     }
 }
+

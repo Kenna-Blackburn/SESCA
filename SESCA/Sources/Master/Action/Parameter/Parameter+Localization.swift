@@ -18,3 +18,29 @@ extension Master.Action.Parameter {
         let booleanDisplay: BooleanDisplay?
     }
 }
+
+extension Master.Action.Parameter.Localization {
+    init(
+        parameterRow: RawSQLite.Tables.Parameters.Row,
+        sqlite: RawSQLite,
+    ) throws {
+        let parameterLocalizationRow = try sqlite[RawSQLite.Tables.ParameterLocalizations.self]
+            .rows
+            .first {
+                $0.transientToolID == parameterRow.transientToolID &&
+                $0.persistentParameterID == parameterRow.persistentParameterID
+            }
+            .unwrap(throwing: LocativeError())
+        
+        self.localeID = parameterLocalizationRow.locale
+        
+        self.name = parameterLocalizationRow.name
+        
+        self.descriptionSummary = parameterLocalizationRow.description
+        
+        self.booleanDisplay = BooleanDisplay(
+            true: parameterLocalizationRow.trueString,
+            false: parameterLocalizationRow.falseString,
+        )
+    }
+}
