@@ -16,10 +16,10 @@ extension Master {
         let parameters: [Parameter]
         let outputTypeID: ValueType.PersistentID
         
-        let sourceContainerID: Container.PersistentID
-        let attributionContainerID: Container.PersistentID?
+        let sourceContainerID: Master.Container.PersistentID
+        let attributionContainerID: Master.Container.PersistentID?
         
-        let localization: Master.Action.Localization
+        let localization: Localization
         
         let _flags: Int
         let _visibilityFlags: Int
@@ -66,7 +66,7 @@ extension Master.Action {
             self.attributionContainerID = nil
         }
         
-        self.localization = try Master.Action.Localization(
+        self.localization = try Localization(
             toolRow: toolRow,
             sqlite: sqlite,
         )

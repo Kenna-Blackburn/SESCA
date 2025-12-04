@@ -13,7 +13,7 @@ extension Master.ValueType.KindSpecificMetadata.Entity {
         
         let persistentID: PersistentID
         
-        let localization: Master.ValueType.KindSpecificMetadata.Entity.Property.Locatization
+        let localization: Locatization
         
         let _typeInstance: Master.ValueType._Instance
     }
@@ -26,7 +26,7 @@ extension Master.ValueType.KindSpecificMetadata.Entity.Property {
     ) throws {
         self.persistentID = propertyRow.persistentPropertyID
         
-        self.localization = try Master.ValueType.KindSpecificMetadata.Entity.Property.Locatization(
+        self.localization = try Locatization(
             propertyRow: propertyRow,
             sqlite: sqlite,
         )

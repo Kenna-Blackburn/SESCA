@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import UniformTypeIdentifiers
 
 extension Master {
     struct ValueType: Codable, Hashable {
@@ -16,10 +15,10 @@ extension Master {
         
         let kindSpecificMetadata: KindSpecificMetadata?
         
-        let sourceContainerID: Container.PersistentID
-        let coercions: [UTType]
+        let sourceContainerID: Master.Container.PersistentID
+        let coercionUTIs: [String]
         
-        let localization: Master.ValueType.Locatization?
+        let localization: Locatization?
         
         let _blobID: Data
         let _kind: Int
@@ -37,7 +36,7 @@ extension Master.ValueType {
     ) throws {
         self.persistentID = typeRow.persistentTypeID
         
-        self.kindSpecificMetadata = try Master.ValueType.KindSpecificMetadata(
+        self.kindSpecificMetadata = try KindSpecificMetadata(
             typeRow: typeRow,
             sqlite: sqlite
         )
@@ -48,17 +47,10 @@ extension Master.ValueType {
             .unwrap(throwing: LocativeError())
             .persistentContainerID
         
-        self.coercions = sqlite[RawSQLite.Tables.UTTypeCoercions.self]
+        self.coercionUTIs = sqlite[RawSQLite.Tables.UTTypeCoercions.self]
             .rows
             .filter({ $0.persistentTypeID == typeRow.persistentTypeID })
-            .map {
-                if let type = UTType($0.coercionUTI) {
-                    return type
-                } else {
-                    print("Got unknown UTI '\($0.coercionUTI)'. Falling back to 'UTType.init(importedAs:)'.")
-                    return UTType(importedAs: $0.coercionUTI)
-                }
-            }
+            .map(\.coercionUTI)
         
         self.localization = try Master.ValueType.Locatization(
             typeRow: typeRow,

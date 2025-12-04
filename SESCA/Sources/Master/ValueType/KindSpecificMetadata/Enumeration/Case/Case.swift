@@ -22,9 +22,9 @@ extension Master.ValueType.KindSpecificMetadata.Enumeration.Case {
         caseRow: RawSQLite.Tables.EnumerationCases.Row,
         sqlite: RawSQLite,
     ) throws {
-        self.persistentID = caseRow.persistentEnumerationID
+        self.persistentID = caseRow.persistentCaseID
         
-        self.localization = try Master.ValueType.KindSpecificMetadata.Enumeration.Case.Locatization(
+        self.localization = try Locatization(
             caseRow: caseRow,
             sqlite: sqlite,
         )

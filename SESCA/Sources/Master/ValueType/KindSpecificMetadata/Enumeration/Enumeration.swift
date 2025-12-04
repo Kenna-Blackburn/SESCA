@@ -21,6 +21,7 @@ extension Master.ValueType.KindSpecificMetadata.Enumeration {
         self.cases = try sqlite[RawSQLite.Tables.EnumerationCases.self]
             .rows
             .filter({ $0.persistentEnumerationID == typeRow.persistentTypeID })
-            .map({ try Master.ValueType.KindSpecificMetadata.Enumeration.Case(caseRow: $0, sqlite: sqlite) })
+            .map({ try Case(caseRow: $0, sqlite: sqlite) })
+            .sorted(using: SortDescriptor(\.persistentID))
     }
 }

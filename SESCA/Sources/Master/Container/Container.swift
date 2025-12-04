@@ -16,7 +16,7 @@ extension Master {
         let bundleVersionString: String
         let teamID: String
         
-        let localization: Master.Container.Localization
+        let localization: Localization
         
         let _origin: Int
         let _containerType: Int
@@ -34,7 +34,7 @@ extension Master.Container {
         
         self.teamID = containerRow.teamID
         
-        self.localization = try Master.Container.Localization(
+        self.localization = try Localization(
             containerRow: containerRow,
             sqlite: sqlite,
         )

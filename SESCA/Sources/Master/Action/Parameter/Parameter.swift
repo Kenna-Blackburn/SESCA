@@ -15,7 +15,7 @@ extension Master.Action {
         
         let inputTypeID: Master.ValueType.PersistentID
         
-        let localization: Master.Action.Parameter.Localization
+        let localization: Localization
         
         let _inputTypeInstance: Master.ValueType._Instance
         let _relationships: Data
@@ -39,7 +39,7 @@ extension Master.Action.Parameter {
             .unwrap(throwing: LocativeError())
             .persistentTypeID
         
-        self.localization = try Master.Action.Parameter.Localization(
+        self.localization = try Localization(
             parameterRow: parameterRow,
             sqlite: sqlite,
         )

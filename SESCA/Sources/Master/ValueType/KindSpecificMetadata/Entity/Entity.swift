@@ -21,6 +21,7 @@ extension Master.ValueType.KindSpecificMetadata.Entity {
         self.properties = try sqlite[RawSQLite.Tables.EntityProperties.self]
             .rows
             .filter({ $0.persistentEntityID == typeRow.persistentTypeID })
-            .map({ try Master.ValueType.KindSpecificMetadata.Entity.Property(propertyRow: $0, sqlite: sqlite) })
+            .map({ try Property(propertyRow: $0, sqlite: sqlite) })
+            .sorted(using: SortDescriptor(\.persistentID))
     }
 }

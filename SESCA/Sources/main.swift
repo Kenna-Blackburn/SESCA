@@ -23,7 +23,7 @@ enum Main {
         
         static let outputURL: URL = URL
             .desktopDirectory
-            .appending(path: "SESCA/Master_4b.json")
+            .appending(path: "SESCA/Master_4_1.json")
     }
     
     static func main() throws {
