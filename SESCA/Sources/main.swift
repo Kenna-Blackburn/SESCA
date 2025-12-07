@@ -22,8 +22,8 @@ enum Main {
             .appending(path: "SESCA/Tools-prod_1.sqlite")
         
         static let outputURL: URL = URL
-            .desktopDirectory
-            .appending(path: "SESCA/Master_4_1.json")
+            .libraryDirectory
+            .appending(path: "Mobile Documents/com~apple~CloudDocs/Projects/SESCA/SESCA/Master.json")
     }
     
     static func main() throws {

@@ -14,12 +14,14 @@ extension Master.Action.Parameter.Localization {
             true trueString: String?,
             false falseString: String?,
         ) {
-            guard trueString != nil && falseString != nil else {
-                return nil
-            }
-            
             self.trueString = trueString
             self.falseString = falseString
+            
+            if self.trueString == nil,
+               self.falseString == nil
+            {
+                return nil
+            }
         }
         
         enum CodingKeys: String, CodingKey {
